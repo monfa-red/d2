@@ -93,11 +93,11 @@ func ConvertGraph(ctx context.Context, g *d2graph.Graph, opts *ConfigurableOpts)
 			switch g.Root.Direction.Value {
 			case "right", "left":
 				if obj.Attributes.HeightAttr == nil {
-					obj.Height = math.Max(obj.Height, math.Max(incoming, outgoing)*port_spacing)
+					obj.Height = math.Max(obj.Height, math.Max(incoming, outgoing)*PortSpacing)
 				}
 			default:
 				if obj.Attributes.WidthAttr == nil {
-					obj.Width = math.Max(obj.Width, math.Max(incoming, outgoing)*port_spacing)
+					obj.Width = math.Max(obj.Width, math.Max(incoming, outgoing)*PortSpacing)
 				}
 			}
 		}

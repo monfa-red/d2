@@ -25,6 +25,7 @@ import (
 
 	"oss.terrastruct.com/d2/d2ast"
 	"oss.terrastruct.com/d2/d2graph"
+	"oss.terrastruct.com/d2/d2layouts/d2elklayout"
 	"oss.terrastruct.com/d2/d2lib"
 	"oss.terrastruct.com/d2/d2parser"
 	"oss.terrastruct.com/d2/d2plugin"
@@ -105,6 +106,15 @@ func Run(ctx context.Context, ms *xmain.State) (err error) {
 	// fraction (rect/oval/package: 1×, hexagon/cylinder: ½×, diamond: ¼×,
 	// etc.) so the relative proportions across shape types are preserved.
 	shapeDefaultPaddingFlag, err := ms.Opts.Float64("D2_SHAPE_DEFAULT_PADDING", "shape-default-padding", "", shape.DefaultPadding, "geometric inner padding each shape adds around content; d2's default is 40 px")
+	if err != nil {
+		return err
+	}
+	// port-spacing controls the minimum size d2 reserves per edge attaching
+	// to a node. With 2+ edges in/out, node size grows to fit them — at
+	// the default 40 a circle with 2 in + 2 out is forced to ≥80 px tall
+	// regardless of label size, overriding --shape-default-padding. Lower
+	// this for tight charts where edges visually crowd is acceptable.
+	portSpacingFlag, err := ms.Opts.Float64("D2_PORT_SPACING", "port-spacing", "", d2elklayout.PortSpacing, "ELK only: min space reserved per edge attached to a node; d2's default is 40 px")
 	if err != nil {
 		return err
 	}
@@ -460,6 +470,7 @@ func Run(ctx context.Context, ms *xmain.State) (err error) {
 	// var when computing each shape's default size.
 	d2graph.INNER_LABEL_PADDING = int(*shapePaddingFlag)
 	shape.DefaultPadding = *shapeDefaultPaddingFlag
+	d2elklayout.PortSpacing = *portSpacingFlag
 	d2graph.DefaultLabelFontSize = int(*fontSizeFlag)
 	d2graph.DefaultEdgeFontSize = int(*edgeFontSizeFlag)
 	d2graph.ContainerLabelFontSize = int(*containerFontSizeFlag)

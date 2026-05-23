@@ -131,7 +131,12 @@ var DefaultOpts = ConfigurableOpts{
 	Thoroughness:    8,
 }
 
-var port_spacing = 40.
+// PortSpacing is the minimum gap reserved per edge attaching to a node.
+// d2 sizes nodes with 2+ in/out edges to at least
+// max(incoming, outgoing) * PortSpacing so the edges don't crowd. With
+// many edges or large default, nodes (especially circles) inflate beyond
+// what their label would need. Exposed via --port-spacing.
+var PortSpacing = 40.
 var edge_node_spacing = 40
 
 type elkOpts struct {
@@ -261,11 +266,11 @@ func Layout(ctx context.Context, g *d2graph.Graph, opts *ConfigurableOpts) (err 
 			switch g.Root.Direction.Value {
 			case "right", "left":
 				if obj.Attributes.HeightAttr == nil {
-					obj.Height = math.Max(obj.Height, math.Max(incoming, outgoing)*port_spacing)
+					obj.Height = math.Max(obj.Height, math.Max(incoming, outgoing)*PortSpacing)
 				}
 			default:
 				if obj.Attributes.WidthAttr == nil {
-					obj.Width = math.Max(obj.Width, math.Max(incoming, outgoing)*port_spacing)
+					obj.Width = math.Max(obj.Width, math.Max(incoming, outgoing)*PortSpacing)
 				}
 			}
 		}
