@@ -88,6 +88,14 @@ func Run(ctx context.Context, ms *xmain.State) (err error) {
 	if err != nil {
 		return err
 	}
+	// shape-padding controls the gap between a shape's border and its
+	// label, per side. Lower = tighter shapes. Default matches d2's prior
+	// hardcoded INNER_LABEL_PADDING; set this flag to mutate the d2graph
+	// package variable before layout runs.
+	shapePaddingFlag, err := ms.Opts.Int64("D2_SHAPE_PADDING", "shape-padding", "", int64(d2graph.INNER_LABEL_PADDING), "pixels reserved between a shape's border and its label (per side)")
+	if err != nil {
+		return err
+	}
 	animateIntervalFlag, err := ms.Opts.Int64("D2_ANIMATE_INTERVAL", "animate-interval", "", 0, "if given, multiple boards are packaged as 1 SVG which transitions through each board at the interval (in milliseconds). Can only be used with SVG or GIF exports. For GIF exports, defaults to 1000ms if not specified.")
 	if err != nil {
 		return err
@@ -411,6 +419,10 @@ func Run(ctx context.Context, ms *xmain.State) (err error) {
 		animateInterval = 1000
 		ms.Log.Debug.Printf("GIF export: animate-interval not specified, defaulting to 1000ms")
 	}
+
+	// Apply --shape-padding before compile/layout runs. d2graph reads this
+	// var when computing each shape's default size.
+	d2graph.INNER_LABEL_PADDING = int(*shapePaddingFlag)
 
 	_, written, err := compile(ctx, ms, plugins, nil, layoutFlag, renderOpts, fontFamily, monoFontFamily, animateInterval, inputPath, outputPath, boardPath, noChildren, *bundleFlag, *forceAppendixFlag, pw.Browser, outputFormat, *asciiModeFlag)
 	if err != nil {

@@ -32,7 +32,10 @@ import (
 	"oss.terrastruct.com/d2/lib/textmeasure"
 )
 
-const INNER_LABEL_PADDING int = 5
+// INNER_LABEL_PADDING is the pixels reserved between a shape's label and
+// its border (per side). Exposed as a `var` so the d2 CLI's --shape-padding
+// flag can override it before layout runs. Previously a const = 5.
+var INNER_LABEL_PADDING int = 5
 const DEFAULT_SHAPE_SIZE = 100.
 const MIN_SHAPE_SIZE = 5
 
