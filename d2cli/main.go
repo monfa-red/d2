@@ -129,6 +129,14 @@ func Run(ctx context.Context, ms *xmain.State) (err error) {
 	if err != nil {
 		return err
 	}
+	// arrowhead-scale multiplies arrow-tip dimensions across all arrowhead
+	// types. 1.0 = d2's defaults; 0.7 makes tips ~30% smaller; 1.3 makes
+	// them bolder. Useful when --edge-stroke-width changes don't move
+	// arrowheads (those are clipped to a minimum of 2 in Arrowhead.Dimensions).
+	arrowheadScaleFlag, err := ms.Opts.Float64("D2_ARROWHEAD_SCALE", "arrowhead-scale", "", d2target.ArrowheadScale, "uniform scale for all arrowhead types; 1.0 is d2's default")
+	if err != nil {
+		return err
+	}
 	// font-size: when >0, replaces d2's level-based node-label scale
 	// (28/24/20/16 px by depth) with a single value. Lower = tighter shapes
 	// because d2 reserves less space for the smaller text. Per-shape
@@ -484,6 +492,7 @@ func Run(ctx context.Context, ms *xmain.State) (err error) {
 	d2elklayout.PortSpacing = *portSpacingFlag
 	d2target.DefaultShapeStrokeWidth = int(*shapeStrokeWidthFlag)
 	d2target.DefaultConnectionStrokeWidth = int(*edgeStrokeWidthFlag)
+	d2target.ArrowheadScale = *arrowheadScaleFlag
 	d2graph.DefaultLabelFontSize = int(*fontSizeFlag)
 	d2graph.DefaultEdgeFontSize = int(*edgeFontSizeFlag)
 	d2graph.ContainerLabelFontSize = int(*containerFontSizeFlag)

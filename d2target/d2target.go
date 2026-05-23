@@ -703,6 +703,13 @@ var DefaultShapeStrokeWidth = 2
 // Exposed via the --edge-stroke-width CLI flag.
 var DefaultConnectionStrokeWidth = 2
 
+// ArrowheadScale multiplies every arrowhead's computed dimensions. 1.0 is
+// d2's default; lower shrinks arrow tips proportionally across all types
+// (triangle/diamond/circle/etc.). All callers — label placement,
+// edge-endpoint trace, polygon coordinates — go through Arrowhead.Dimensions
+// so geometry stays in sync. Exposed via --arrowhead-scale.
+var ArrowheadScale = 1.0
+
 func BaseShape() *Shape {
 	return &Shape{
 		Opacity:     1,
@@ -1050,7 +1057,8 @@ func (arrowhead Arrowhead) Dimensions(strokeWidth float64) (width, height float6
 	}
 
 	clippedStrokeWidth := go2.Max(MIN_ARROWHEAD_STROKE_WIDTH, strokeWidth)
-	return baseWidth + clippedStrokeWidth*widthMultiplier, baseHeight + clippedStrokeWidth*heightMultiplier
+	return (baseWidth + clippedStrokeWidth*widthMultiplier) * ArrowheadScale,
+		(baseHeight + clippedStrokeWidth*heightMultiplier) * ArrowheadScale
 }
 
 type Point struct {
