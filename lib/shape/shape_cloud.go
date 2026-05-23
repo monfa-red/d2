@@ -136,5 +136,5 @@ func (s shapeCloud) GetSVGPathData() []string {
 }
 
 func (s shapeCloud) GetDefaultPadding() (paddingX, paddingY float64) {
-	return defaultPadding, defaultPadding / 2
+	return DefaultPadding, DefaultPadding / 2
 }

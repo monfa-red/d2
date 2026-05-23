@@ -33,9 +33,16 @@ const (
 	TEXT_TYPE  = "Text"
 	CODE_TYPE  = "Code"
 	IMAGE_TYPE = "Image"
-
-	defaultPadding = 40.
 )
+
+// DefaultPadding is the geometric inner padding each shape adds around
+// its content (label/icon) when computing its outer size. Most shapes use
+// it directly (rect, oval, package) or as a fraction (hexagon: half,
+// diamond: quarter, etc.) — see each shape's GetDefaultPadding.
+//
+// Exposed as a runtime-tunable var (was a const = 40) so the d2 CLI's
+// --shape-default-padding flag can shrink shapes when labels are small.
+var DefaultPadding float64 = 40
 
 type Shape interface {
 	Is(shape string) bool
@@ -113,7 +120,7 @@ func (s baseShape) GetDimensionsToFit(width, height, paddingX, paddingY float64)
 }
 
 func (s baseShape) GetDefaultPadding() (paddingX, paddingY float64) {
-	return defaultPadding, defaultPadding
+	return DefaultPadding, DefaultPadding
 }
 
 func (s baseShape) Perimeter() []geo.Intersectable {

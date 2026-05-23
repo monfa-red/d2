@@ -39,6 +39,7 @@ import (
 	"oss.terrastruct.com/d2/d2themes/d2themescatalog"
 	"oss.terrastruct.com/d2/lib/background"
 	"oss.terrastruct.com/d2/lib/imgbundler"
+	"oss.terrastruct.com/d2/lib/shape"
 	"oss.terrastruct.com/d2/lib/log"
 	"oss.terrastruct.com/d2/lib/pdf"
 	"oss.terrastruct.com/d2/lib/png"
@@ -93,7 +94,17 @@ func Run(ctx context.Context, ms *xmain.State) (err error) {
 	// label, per side. Lower = tighter shapes. Default matches d2's prior
 	// hardcoded INNER_LABEL_PADDING; set this flag to mutate the d2graph
 	// package variable before layout runs.
-	shapePaddingFlag, err := ms.Opts.Int64("D2_SHAPE_PADDING", "shape-padding", "", int64(d2graph.INNER_LABEL_PADDING), "pixels reserved between a shape's border and its label (per side)")
+	shapePaddingFlag, err := ms.Opts.Int64("D2_SHAPE_PADDING", "shape-padding", "", int64(d2graph.INNER_LABEL_PADDING), "pixels added to label dimensions when sizing a shape (small lever)")
+	if err != nil {
+		return err
+	}
+	// shape-default-padding controls the geometric inner padding each shape
+	// adds around its content — the big lever. d2 defaults this to 40 px
+	// per side, which is generous; small charts with tight labels can drop
+	// it to 8–16 for noticeably tighter shapes. Each shape applies it as a
+	// fraction (rect/oval/package: 1×, hexagon/cylinder: ½×, diamond: ¼×,
+	// etc.) so the relative proportions across shape types are preserved.
+	shapeDefaultPaddingFlag, err := ms.Opts.Float64("D2_SHAPE_DEFAULT_PADDING", "shape-default-padding", "", shape.DefaultPadding, "geometric inner padding each shape adds around content; d2's default is 40 px")
 	if err != nil {
 		return err
 	}
@@ -448,6 +459,7 @@ func Run(ctx context.Context, ms *xmain.State) (err error) {
 	// Apply --shape-padding before compile/layout runs. d2graph reads this
 	// var when computing each shape's default size.
 	d2graph.INNER_LABEL_PADDING = int(*shapePaddingFlag)
+	shape.DefaultPadding = *shapeDefaultPaddingFlag
 	d2graph.DefaultLabelFontSize = int(*fontSizeFlag)
 	d2graph.DefaultEdgeFontSize = int(*edgeFontSizeFlag)
 	d2graph.ContainerLabelFontSize = int(*containerFontSizeFlag)

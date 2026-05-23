@@ -86,5 +86,5 @@ func (s shapePerson) GetDimensionsToFit(width, height, paddingX, paddingY float6
 }
 
 func (s shapePerson) GetDefaultPadding() (paddingX, paddingY float64) {
-	return 10, defaultPadding
+	return 10, DefaultPadding
 }

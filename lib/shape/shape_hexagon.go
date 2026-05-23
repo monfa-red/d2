@@ -64,5 +64,5 @@ func (s shapeHexagon) GetDimensionsToFit(width, height, paddingX, paddingY float
 }
 
 func (s shapeHexagon) GetDefaultPadding() (paddingX, paddingY float64) {
-	return defaultPadding / 2, defaultPadding / 2
+	return DefaultPadding / 2, DefaultPadding / 2
 }

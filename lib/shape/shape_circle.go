@@ -57,5 +57,5 @@ func (s shapeCircle) Perimeter() []geo.Intersectable {
 }
 
 func (s shapeCircle) GetDefaultPadding() (paddingX, paddingY float64) {
-	return defaultPadding / math.Sqrt2, defaultPadding / math.Sqrt2
+	return DefaultPadding / math.Sqrt2, DefaultPadding / math.Sqrt2
 }

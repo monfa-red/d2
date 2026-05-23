@@ -102,5 +102,5 @@ func (s shapePage) GetDimensionsToFit(width, height, paddingX, paddingY float64)
 }
 
 func (s shapePage) GetDefaultPadding() (paddingX, paddingY float64) {
-	return defaultPadding, pageCornerHeight + defaultPadding
+	return DefaultPadding, pageCornerHeight + DefaultPadding
 }

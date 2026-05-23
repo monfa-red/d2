@@ -85,5 +85,5 @@ func (s shapeQueue) GetDimensionsToFit(width, height, paddingX, paddingY float64
 }
 
 func (s shapeQueue) GetDefaultPadding() (paddingX, paddingY float64) {
-	return defaultPadding / 2, defaultPadding
+	return DefaultPadding / 2, DefaultPadding
 }

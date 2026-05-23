@@ -67,5 +67,5 @@ func (s shapeStoredData) GetDimensionsToFit(width, height, paddingX, paddingY fl
 }
 
 func (s shapeStoredData) GetDefaultPadding() (paddingX, paddingY float64) {
-	return defaultPadding - 10, defaultPadding
+	return DefaultPadding - 10, DefaultPadding
 }

@@ -65,5 +65,5 @@ func (s shapeStep) GetDimensionsToFit(width, height, paddingX, paddingY float64)
 }
 
 func (s shapeStep) GetDefaultPadding() (paddingX, paddingY float64) {
-	return defaultPadding / 4, defaultPadding + STEP_WEDGE_WIDTH
+	return DefaultPadding / 4, DefaultPadding + STEP_WEDGE_WIDTH
 }

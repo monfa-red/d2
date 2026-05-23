@@ -63,5 +63,5 @@ func (s shapeDocument) GetDimensionsToFit(width, height, paddingX, paddingY floa
 }
 
 func (s shapeDocument) GetDefaultPadding() (paddingX, paddingY float64) {
-	return defaultPadding, defaultPadding * docPathInnerBottom / docPathHeight
+	return DefaultPadding, DefaultPadding * docPathInnerBottom / docPathHeight
 }

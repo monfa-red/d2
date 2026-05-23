@@ -89,5 +89,5 @@ func (s shapeCallout) GetDimensionsToFit(width, height, paddingX, paddingY float
 }
 
 func (s shapeCallout) GetDefaultPadding() (paddingX, paddingY float64) {
-	return defaultPadding, defaultPadding / 2
+	return DefaultPadding, DefaultPadding / 2
 }

@@ -67,5 +67,5 @@ func (s shapeDiamond) GetDimensionsToFit(width, height, paddingX, paddingY float
 }
 
 func (s shapeDiamond) GetDefaultPadding() (paddingX, paddingY float64) {
-	return defaultPadding / 4, defaultPadding / 2
+	return DefaultPadding / 4, DefaultPadding / 2
 }
