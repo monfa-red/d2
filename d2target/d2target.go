@@ -693,11 +693,21 @@ type Text struct {
 	LabelFill   string `json:"labelFill,omitempty"`
 }
 
+// DefaultShapeStrokeWidth seeds every new shape's stroke width. Per-shape
+// `style.stroke-width: N` in the d2 source still overrides this through
+// d2exporter.applyStyles. Exposed via the --shape-stroke-width CLI flag.
+var DefaultShapeStrokeWidth = 2
+
+// DefaultConnectionStrokeWidth seeds every new connection's stroke width.
+// Per-edge `style.stroke-width` in the d2 source still overrides.
+// Exposed via the --edge-stroke-width CLI flag.
+var DefaultConnectionStrokeWidth = 2
+
 func BaseShape() *Shape {
 	return &Shape{
 		Opacity:     1,
 		StrokeDash:  0,
-		StrokeWidth: 2,
+		StrokeWidth: DefaultShapeStrokeWidth,
 		Text: Text{
 			Bold:       true,
 			FontFamily: "DEFAULT",
@@ -777,7 +787,7 @@ func BaseConnection() *Connection {
 		Route:        make([]*geo.Point, 0),
 		Opacity:      1,
 		StrokeDash:   0,
-		StrokeWidth:  2,
+		StrokeWidth:  DefaultConnectionStrokeWidth,
 		BorderRadius: 10,
 		Text: Text{
 			Italic:     true,

@@ -118,6 +118,17 @@ func Run(ctx context.Context, ms *xmain.State) (err error) {
 	if err != nil {
 		return err
 	}
+	// Stroke widths. Per-shape/edge style.stroke-width in the d2 source
+	// still wins; these only seed the default applied to shapes/edges that
+	// don't set their own. d2's default for both is 2 px.
+	shapeStrokeWidthFlag, err := ms.Opts.Int64("D2_SHAPE_STROKE_WIDTH", "shape-stroke-width", "", int64(d2target.DefaultShapeStrokeWidth), "default stroke width for shape borders in px")
+	if err != nil {
+		return err
+	}
+	edgeStrokeWidthFlag, err := ms.Opts.Int64("D2_EDGE_STROKE_WIDTH", "edge-stroke-width", "", int64(d2target.DefaultConnectionStrokeWidth), "default stroke width for edge/connection lines in px")
+	if err != nil {
+		return err
+	}
 	// font-size: when >0, replaces d2's level-based node-label scale
 	// (28/24/20/16 px by depth) with a single value. Lower = tighter shapes
 	// because d2 reserves less space for the smaller text. Per-shape
@@ -471,6 +482,8 @@ func Run(ctx context.Context, ms *xmain.State) (err error) {
 	d2graph.INNER_LABEL_PADDING = int(*shapePaddingFlag)
 	shape.DefaultPadding = *shapeDefaultPaddingFlag
 	d2elklayout.PortSpacing = *portSpacingFlag
+	d2target.DefaultShapeStrokeWidth = int(*shapeStrokeWidthFlag)
+	d2target.DefaultConnectionStrokeWidth = int(*edgeStrokeWidthFlag)
 	d2graph.DefaultLabelFontSize = int(*fontSizeFlag)
 	d2graph.DefaultEdgeFontSize = int(*edgeFontSizeFlag)
 	d2graph.ContainerLabelFontSize = int(*containerFontSizeFlag)
