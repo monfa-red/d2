@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -105,6 +106,18 @@ func Run(ctx context.Context, ms *xmain.State) (err error) {
 		return err
 	}
 	edgeFontSizeFlag, err := ms.Opts.Int64("D2_EDGE_FONT_SIZE", "edge-font-size", "", 0, "default font size for edge labels in px; 0 keeps d2's default (FONT_SIZE_M = 16)")
+	if err != nil {
+		return err
+	}
+	// container-label-padding controls the inset for container (cluster)
+	// labels independently from edge labels and icons. Accepts the same
+	// "[top=N,left=N,bottom=N,right=N]" format as --elk-padding so you can
+	// align a cluster title with its children's left edge without padding
+	// the top equally. Empty string keeps d2's default (label.PADDING).
+	containerLabelPaddingFlag := ms.Opts.String("D2_CONTAINER_LABEL_PADDING", "container-label-padding", "", "", "directional inset for container labels in [top=N,left=N,bottom=N,right=N] format; empty keeps d2's default")
+	// container-font-size overrides --font-size for container labels only,
+	// so cluster titles can be sized differently from leaf-node labels.
+	containerFontSizeFlag, err := ms.Opts.Int64("D2_CONTAINER_FONT_SIZE", "container-font-size", "", 0, "default font size for container labels in px; 0 falls back to --font-size, then d2's level-based scale")
 	if err != nil {
 		return err
 	}
@@ -437,6 +450,8 @@ func Run(ctx context.Context, ms *xmain.State) (err error) {
 	d2graph.INNER_LABEL_PADDING = int(*shapePaddingFlag)
 	d2graph.DefaultLabelFontSize = int(*fontSizeFlag)
 	d2graph.DefaultEdgeFontSize = int(*edgeFontSizeFlag)
+	d2graph.ContainerLabelFontSize = int(*containerFontSizeFlag)
+	d2graph.ContainerLabelPadding = parseContainerLabelPadding(*containerLabelPaddingFlag)
 
 	_, written, err := compile(ctx, ms, plugins, nil, layoutFlag, renderOpts, fontFamily, monoFontFamily, animateInterval, inputPath, outputPath, boardPath, noChildren, *bundleFlag, *forceAppendixFlag, pw.Browser, outputFormat, *asciiModeFlag)
 	if err != nil {
@@ -1564,4 +1579,29 @@ func Write(ms *xmain.State, path string, out []byte) error {
 
 func init() {
 	log.Init()
+}
+
+// parseContainerLabelPadding turns an elk-padding-style string like
+// "[top=16,left=16,bottom=10,right=16]" into a ContainerPadding. Missing
+// keys default to 0. Returns the zero value for an empty string so callers
+// can fall back to d2's default label.PADDING.
+func parseContainerLabelPadding(s string) d2graph.ContainerPadding {
+	var p d2graph.ContainerPadding
+	if strings.TrimSpace(s) == "" {
+		return p
+	}
+	get := func(key string) int {
+		re := regexp.MustCompile(key + `=(\d+)`)
+		m := re.FindStringSubmatch(s)
+		if len(m) != 2 {
+			return 0
+		}
+		n, _ := strconv.Atoi(m[1])
+		return n
+	}
+	p.Top = get("top")
+	p.Left = get("left")
+	p.Bottom = get("bottom")
+	p.Right = get("right")
+	return p
 }

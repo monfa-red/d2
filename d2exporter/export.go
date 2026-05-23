@@ -217,6 +217,7 @@ func toShape(obj *d2graph.Object, g *d2graph.Graph) d2target.Shape {
 	shape.Width = int(obj.Width)
 	shape.Height = int(obj.Height)
 	shape.Language = obj.Language
+	shape.IsContainer = len(obj.ChildrenArray) > 0
 
 	text := obj.Text()
 	shape.Bold = text.IsBold

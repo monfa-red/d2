@@ -386,11 +386,60 @@ func (obj *Object) GetLabelTopLeft() *geo.Point {
 		box = s.GetInnerBox()
 	}
 
-	labelTL := labelPosition.GetPointOnBox(box, label.PADDING,
-		float64(obj.LabelDimensions.Width),
-		float64(obj.LabelDimensions.Height),
-	)
-	return labelTL
+	w := float64(obj.LabelDimensions.Width)
+	h := float64(obj.LabelDimensions.Height)
+	// Container labels use directional --container-label-padding when set;
+	// otherwise (and for non-container labels) fall back to label.PADDING.
+	if obj.IsContainer() && !ContainerLabelPadding.IsZero() {
+		return ContainerLabelTopLeft(box, labelPosition, w, h)
+	}
+	return labelPosition.GetPointOnBox(box, float64(label.PADDING), w, h)
+}
+
+// ContainerLabelTopLeft computes a container label's top-left point using
+// directional padding from ContainerLabelPadding. Mirrors
+// label.Position.GetPointOnBox but routes each axis to the matching side
+// (TopLeft uses Top+Left, MiddleRight uses Right with Y centered, etc.).
+// Positions that don't map cleanly fall back to the average of all four
+// sides. Exported so the SVG renderer can apply the same offset at render
+// time as the layout used at layout time.
+func ContainerLabelTopLeft(box *geo.Box, pos label.Position, w, h float64) *geo.Point {
+	pad := ContainerLabelPadding
+	p := box.TopLeft.Copy()
+	center := box.Center()
+	top, left, bottom, right := float64(pad.Top), float64(pad.Left), float64(pad.Bottom), float64(pad.Right)
+	switch pos {
+	case label.InsideTopLeft:
+		p.X += left
+		p.Y += top
+	case label.InsideTopCenter:
+		p.X = center.X - w/2
+		p.Y += top
+	case label.InsideTopRight:
+		p.X += box.Width - w - right
+		p.Y += top
+	case label.InsideMiddleLeft:
+		p.X += left
+		p.Y = center.Y - h/2
+	case label.InsideMiddleRight:
+		p.X += box.Width - w - right
+		p.Y = center.Y - h/2
+	case label.InsideBottomLeft:
+		p.X += left
+		p.Y += box.Height - h - bottom
+	case label.InsideBottomCenter:
+		p.X = center.X - w/2
+		p.Y += box.Height - h - bottom
+	case label.InsideBottomRight:
+		p.X += box.Width - w - right
+		p.Y += box.Height - h - bottom
+	default:
+		// Outside positions and InsideMiddleCenter — fall back to symmetric
+		// padding using the average so the label still moves predictably.
+		avg := (top + left + bottom + right) / 4
+		return pos.GetPointOnBox(box, avg, w, h)
+	}
+	return p
 }
 
 func (obj *Object) GetIconTopLeft() *geo.Point {

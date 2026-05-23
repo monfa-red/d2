@@ -46,6 +46,30 @@ var DefaultLabelFontSize int = 0
 // font size for edge labels. Set via the --edge-font-size CLI flag.
 // A per-edge `style.font-size` in the d2 source still wins.
 var DefaultEdgeFontSize int = 0
+
+// ContainerPadding holds directional insets for container labels.
+type ContainerPadding struct {
+	Top, Left, Bottom, Right int
+}
+
+// IsZero reports whether none of the directional values are set; when true,
+// container label positioning falls back to label.PADDING.
+func (p ContainerPadding) IsZero() bool {
+	return p.Top == 0 && p.Left == 0 && p.Bottom == 0 && p.Right == 0
+}
+
+// ContainerLabelPadding replaces label.PADDING for the inset of container
+// (cluster/group) labels only — leaves edge labels and icons using d2's
+// normal label.PADDING. Set via the --container-label-padding CLI flag in
+// the same "[top=N,left=N,bottom=N,right=N]" format as --elk-padding so a
+// cluster label can be inset the same as its children's left edge.
+var ContainerLabelPadding ContainerPadding
+
+// ContainerLabelFontSize, when >0, replaces the level-based font size for
+// container labels (28/24/20/16 px by depth). Set via the
+// --container-font-size CLI flag; takes precedence over --font-size for
+// containers so the title can be sized differently from leaf nodes.
+var ContainerLabelFontSize int = 0
 const DEFAULT_SHAPE_SIZE = 100.
 const MIN_SHAPE_SIZE = 5
 
@@ -686,18 +710,23 @@ func (obj *Object) Text() *d2target.MText {
 		fontSize = d2fonts.FONT_SIZE_L
 	}
 
+	isContainerLabel := false
 	if obj.OuterSequenceDiagram() == nil {
 		// Note: during grid layout when children are temporarily removed `IsContainer` is false
 		if (obj.IsContainer() || obj.IsGridDiagram()) && obj.Shape.Value != "text" {
 			fontSize = obj.Level().LabelSize()
+			isContainerLabel = true
 		}
 	} else {
 		isBold = false
 	}
-	// Global --font-size override: collapses the level-based scale into one
-	// flat value. Applies before the per-shape override below, so any
-	// `style.font-size: N` in the d2 source still wins.
-	if DefaultLabelFontSize > 0 {
+	// Global font-size overrides applied last (before per-shape style).
+	// Container labels prefer --container-font-size; non-containers (and
+	// containers when ContainerLabelFontSize is unset) use --font-size.
+	switch {
+	case isContainerLabel && ContainerLabelFontSize > 0:
+		fontSize = ContainerLabelFontSize
+	case DefaultLabelFontSize > 0:
 		fontSize = DefaultLabelFontSize
 	}
 	if obj.Style.FontSize != nil {

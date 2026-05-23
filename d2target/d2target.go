@@ -608,6 +608,11 @@ type Shape struct {
 	// Currently just used for sequence diagram groups
 	Blend bool `json:"blend"`
 
+	// IsContainer is true when the shape contains other shapes (a cluster
+	// / group). Set during export from d2graph; consumed by d2svg so the
+	// renderer can apply ContainerLabelPadding to container labels only.
+	IsContainer bool `json:"isContainer,omitempty"`
+
 	Class
 	SQLTable
 

@@ -1982,10 +1982,18 @@ func drawShape(writer, appendixWriter io.Writer, diagramHash string, targetShape
 		} else {
 			box = s.GetInnerBox()
 		}
-		labelTL := labelPosition.GetPointOnBox(box, label.PADDING,
-			float64(targetShape.LabelWidth),
-			float64(targetShape.LabelHeight),
-		)
+		w := float64(targetShape.LabelWidth)
+		h := float64(targetShape.LabelHeight)
+		// Container labels honor directional d2graph.ContainerLabelPadding
+		// (set via --container-label-padding) when any side is positive, so
+		// a cluster's title can be inset asymmetrically (e.g. less from top
+		// than from left). Other labels keep d2's default label.PADDING.
+		var labelTL *geo.Point
+		if targetShape.IsContainer && !d2graph.ContainerLabelPadding.IsZero() {
+			labelTL = d2graph.ContainerLabelTopLeft(box, labelPosition, w, h)
+		} else {
+			labelTL = labelPosition.GetPointOnBox(box, float64(label.PADDING), w, h)
+		}
 
 		if labelPosition.IsBorder() {
 			if jsRunner != nil {
