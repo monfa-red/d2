@@ -96,6 +96,18 @@ func Run(ctx context.Context, ms *xmain.State) (err error) {
 	if err != nil {
 		return err
 	}
+	// font-size: when >0, replaces d2's level-based node-label scale
+	// (28/24/20/16 px by depth) with a single value. Lower = tighter shapes
+	// because d2 reserves less space for the smaller text. Per-shape
+	// `style.font-size: N` in the d2 source still wins.
+	fontSizeFlag, err := ms.Opts.Int64("D2_FONT_SIZE", "font-size", "", 0, "default font size for node labels in px; 0 keeps d2's level-based scale")
+	if err != nil {
+		return err
+	}
+	edgeFontSizeFlag, err := ms.Opts.Int64("D2_EDGE_FONT_SIZE", "edge-font-size", "", 0, "default font size for edge labels in px; 0 keeps d2's default (FONT_SIZE_M = 16)")
+	if err != nil {
+		return err
+	}
 	animateIntervalFlag, err := ms.Opts.Int64("D2_ANIMATE_INTERVAL", "animate-interval", "", 0, "if given, multiple boards are packaged as 1 SVG which transitions through each board at the interval (in milliseconds). Can only be used with SVG or GIF exports. For GIF exports, defaults to 1000ms if not specified.")
 	if err != nil {
 		return err
@@ -423,6 +435,8 @@ func Run(ctx context.Context, ms *xmain.State) (err error) {
 	// Apply --shape-padding before compile/layout runs. d2graph reads this
 	// var when computing each shape's default size.
 	d2graph.INNER_LABEL_PADDING = int(*shapePaddingFlag)
+	d2graph.DefaultLabelFontSize = int(*fontSizeFlag)
+	d2graph.DefaultEdgeFontSize = int(*edgeFontSizeFlag)
 
 	_, written, err := compile(ctx, ms, plugins, nil, layoutFlag, renderOpts, fontFamily, monoFontFamily, animateInterval, inputPath, outputPath, boardPath, noChildren, *bundleFlag, *forceAppendixFlag, pw.Browser, outputFormat, *asciiModeFlag)
 	if err != nil {

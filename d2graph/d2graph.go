@@ -36,6 +36,16 @@ import (
 // its border (per side). Exposed as a `var` so the d2 CLI's --shape-padding
 // flag can override it before layout runs. Previously a const = 5.
 var INNER_LABEL_PADDING int = 5
+
+// DefaultLabelFontSize, when >0, replaces d2's level-based node-label font
+// scaling (28/24/20/16 px by depth). Set via the --font-size CLI flag.
+// A per-shape `style.font-size` in the d2 source still wins over this.
+var DefaultLabelFontSize int = 0
+
+// DefaultEdgeFontSize, when >0, replaces FONT_SIZE_M (16 px) as the default
+// font size for edge labels. Set via the --edge-font-size CLI flag.
+// A per-edge `style.font-size` in the d2 source still wins.
+var DefaultEdgeFontSize int = 0
 const DEFAULT_SHAPE_SIZE = 100.
 const MIN_SHAPE_SIZE = 5
 
@@ -684,6 +694,12 @@ func (obj *Object) Text() *d2target.MText {
 	} else {
 		isBold = false
 	}
+	// Global --font-size override: collapses the level-based scale into one
+	// flat value. Applies before the per-shape override below, so any
+	// `style.font-size: N` in the d2 source still wins.
+	if DefaultLabelFontSize > 0 {
+		fontSize = DefaultLabelFontSize
+	}
 	if obj.Style.FontSize != nil {
 		fontSize, _ = strconv.Atoi(obj.Style.FontSize.Value)
 	}
@@ -1269,6 +1285,9 @@ func (e *Edge) ArrowString() string {
 
 func (e *Edge) Text() *d2target.MText {
 	fontSize := d2fonts.FONT_SIZE_M
+	if DefaultEdgeFontSize > 0 {
+		fontSize = DefaultEdgeFontSize
+	}
 	if e.Style.FontSize != nil {
 		fontSize, _ = strconv.Atoi(e.Style.FontSize.Value)
 	}
